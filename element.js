@@ -17,8 +17,9 @@ async function element(tagName, cb) {
         super();
         this.attachShadow({ mode: "open" });
         this.shadowRoot.appendChild(content.cloneNode(true));
-        const old = window.root;
+        const old = { root: window.root, host: window.host };
         window.root = this.shadowRoot;
+        window.host = this;
         for (const script of this.shadowRoot.querySelectorAll("script")) {
           const clone = document.createElement("script");
           for (const attrib of [...script.attributes]) {
@@ -28,7 +29,7 @@ async function element(tagName, cb) {
           script.remove();
           this.shadowRoot.appendChild(clone);
         }
-        window.root = old;
+        Object.assign(window, old);
         cb?.(this.shadowRoot);
       }
     }
